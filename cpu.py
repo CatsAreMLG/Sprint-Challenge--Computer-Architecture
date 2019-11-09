@@ -1,5 +1,4 @@
-"""CPU functionality."""
-
+# cpu
 import sys
 
 
