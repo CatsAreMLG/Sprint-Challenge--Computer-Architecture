@@ -133,6 +133,12 @@ class CPU:
         subroutine_location = self.registers[register_address]
         self.pc = subroutine_location
 
+    def jeq(self):
+        if self.flag == 0b00000001:
+            register_address = self.ram[self.pc + 1]
+            subroutine_location = self.registers[register_address]
+            self.pc = subroutine_location
+
     def run(self):
         running = True
         while running:
@@ -167,6 +173,9 @@ class CPU:
                 # jmp
                 elif op == 'JMP':
                     self.jmp()
+                # jeq
+                elif op == 'JEQ':
+                    self.jeq()
                 # exit
                 elif op == 'HLT':
                     running = False
