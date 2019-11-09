@@ -11,7 +11,10 @@ class CPU:
         self.ram = [0b0] * 0xFF
         self.spl = 8 - 1
         self.registers[self.spl] = 0xF4
-        self.flag = 0b00000000
+        self.fl = 0b00000000
+        self.eq = 0b00000000
+        self.lt = 0b00000000
+        self.gt = 0b00000000
 
         self.OPCODES = {
             0b10000010: 'LDI',
@@ -53,6 +56,16 @@ class CPU:
         # multiplication
         elif op == "MUL":
             self.registers[reg_a] *= self.registers[reg_b]
+        # compare
+        elif op == "CMP":
+            a = self.registers[reg_a]
+            b = self.registers[reg_b]
+            if a == b:
+                self.eq, self.lt, self.gt = (1, 0, 0)
+            elif a < b:
+                self.eq, self.lt, self.gt = (0, 1, 0)
+            elif a > b:
+                self.eq, self.lt, self.gt = (0, 0, 1)
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -134,16 +147,24 @@ class CPU:
         self.pc = subroutine_location
 
     def jeq(self):
-        if self.flag == 0b00000001:
+        if self.eq:
             register_address = self.ram[self.pc + 1]
             subroutine_location = self.registers[register_address]
             self.pc = subroutine_location
+        else:
+            self.pc += 2
 
     def jne(self):
-        if self.flag == 0b00000000:
+        if not self.eq:
             register_address = self.ram[self.pc + 1]
             subroutine_location = self.registers[register_address]
             self.pc = subroutine_location
+        else:
+            self.pc += 2
+
+    def comp(self):
+        self.alu("CMP", self.ram[self.pc + 1], self.ram[self.pc + 2])
+        self.pc += 3
 
     def run(self):
         running = True
@@ -185,6 +206,9 @@ class CPU:
                 # jne
                 elif op == 'JNE':
                     self.jne()
+                # cmp
+                elif op == 'CMP':
+                    self.comp()
                 # exit
                 elif op == 'HLT':
                     running = False
