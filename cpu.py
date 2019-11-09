@@ -139,6 +139,12 @@ class CPU:
             subroutine_location = self.registers[register_address]
             self.pc = subroutine_location
 
+    def jne(self):
+        if self.flag == 0b00000000:
+            register_address = self.ram[self.pc + 1]
+            subroutine_location = self.registers[register_address]
+            self.pc = subroutine_location
+
     def run(self):
         running = True
         while running:
@@ -176,6 +182,9 @@ class CPU:
                 # jeq
                 elif op == 'JEQ':
                     self.jeq()
+                # jne
+                elif op == 'JNE':
+                    self.jne()
                 # exit
                 elif op == 'HLT':
                     running = False
